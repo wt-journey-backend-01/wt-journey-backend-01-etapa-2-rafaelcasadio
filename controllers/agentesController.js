@@ -54,6 +54,19 @@ const updateAgente = (req, res, next) => {
   }
 };
 
+const patchAgente = (req, res, next) => {
+  const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  try {
+    const data = agenteSchema.partial().parse(req.body);
+    const updated = agentesRepository.update(id, data);
+    if (!updated) next(new ApiError("Agente não encontrado.", 404));
+    res.status(200).json(updated);
+  } catch (error) {
+    next(new ApiError(error.message, 400));
+  }
+};
+
 const deleteAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
@@ -71,5 +84,6 @@ module.exports = {
   getAgenteById,
   createAgente,
   updateAgente,
+  patchAgente,
   deleteAgente,
 };

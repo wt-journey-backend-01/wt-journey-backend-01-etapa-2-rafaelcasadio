@@ -6,6 +6,7 @@ router.get("/", agentesController.getAgentes);
 router.get("/:id", agentesController.getAgenteById);
 router.post("/", agentesController.createAgente);
 router.put("/:id", agentesController.updateAgente);
+router.patch("/:id", agentesController.patchAgente);
 router.delete("/:id", agentesController.deleteAgente);
 
 module.exports = router;
