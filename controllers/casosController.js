@@ -21,7 +21,7 @@ const getCasos = (req, res, next) => {
       casos = casos.filter((c) => c.status === status);
     }
     if (id) {
-      if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+      if (!validate(id)) return next(new ApiError("Id Inválido", 400));
       casos = casos.filter((c) => c.agente_id === id);
     }
     res.status(200).json(casos);
@@ -35,7 +35,7 @@ const getCasoById = (req, res, next) => {
   if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const caso = casosRepository.findById(id);
-    if (!agente) {
+    if (!caso) {
       return next(new ApiError("Caso não encontrado", 404));
     }
     res.status(200).json(caso);
@@ -99,7 +99,7 @@ const patchCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
-  if (validate(id)) return next(new ApiError("Id Inválido", 400));
+  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const removed = casosRepository.remove(id);
     if (!removed) return next(new ApiError("Caso não encontrado.", 404));
