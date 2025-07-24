@@ -13,6 +13,7 @@ class ApiError extends Error {
 const getCasos = (req, res, next) => {
   try {
     const casos = casosRepository.findAll();
+    if (!casos) next(new ApiError("Casos não encontrados", 404));
     res.status(200).json(casos);
   } catch (error) {
     next(new ApiError("Erro ao listar casos."));

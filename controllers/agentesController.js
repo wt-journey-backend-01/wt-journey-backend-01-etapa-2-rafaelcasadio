@@ -13,6 +13,7 @@ class ApiError extends Error {
 const getAgentes = (req, res, next) => {
   try {
     const agentes = agentesRepository.findAll();
+    if (!agentes) next(new ApiError("Agentes não encontrados", 404));
     res.status(200).json(agentes);
   } catch (error) {
     next(new ApiError("Erro ao listar agentes."));
