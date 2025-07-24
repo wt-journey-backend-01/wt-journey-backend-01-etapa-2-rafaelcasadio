@@ -14,20 +14,15 @@ class ApiError extends Error {
 const getCasos = (req, res, next) => {
   try {
     let casos = casosRepository.findAll();
-    if (casos.length === 0)
-      return next(new ApiError("Casos não encontrados", 404));
     const { status, id } = req.query;
     if (status) {
       if (status !== "aberto" && status !== "solucionado")
         return next(new ApiError('Status deve ser "aberto" ou "solucionado"'));
       casos = casos.filter((c) => c.status === status);
-      if (casos.length === 0) return next(new ApiError("Casos não encontrados", 404));
     }
     if (id) {
       if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
       casos = casos.filter((c) => c.agente_id === id);
-      if (casos.length === 0)
-        return next(new ApiError("Casos não encontrados", 404));
     }
     res.status(200).json(casos);
   } catch (error) {
@@ -40,7 +35,6 @@ const getCasoById = (req, res, next) => {
   if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const caso = casosRepository.findById(id);
-    if (!caso) return next(new ApiError("Caso não encontrado", 404));
     res.status(200).json(caso);
   } catch (error) {
     next(new ApiError("Erro ao listar caso po id."));

@@ -13,8 +13,6 @@ class ApiError extends Error {
 const getAgentes = (req, res, next) => {
   try {
     let agentes = agentesRepository.findAll();
-    if (agentes.length === 0)
-      return next(new ApiError("Agentes não encontrados", 404));
     const { cargo, sort } = req.query;
     if (cargo) {
       if (cargo !== "inspetor" && cargo !== "delegado")
@@ -22,8 +20,6 @@ const getAgentes = (req, res, next) => {
           new ApiError('Cargo deve ser "inspetor" ou "delegado"', 400)
         );
       agentes = agentes.filter((a) => a.cargo === cargo);
-      if (agentes.length === 0)
-        return next(new ApiError("Agentes não encontrados", 404));
     }
     if (sort) {
       if (sort !== "dataDeIncorporacao" && sort !== "-dataDeIncorporacao")
@@ -55,7 +51,6 @@ const getAgenteById = (req, res, next) => {
   if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const agente = agentesRepository.findById(id);
-    if (!agente) return next(new ApiError("Agente não encontrado", 404));
     res.status(200).json(agente);
   } catch (error) {
     next(new ApiError("Erro ao listar agente por id."));

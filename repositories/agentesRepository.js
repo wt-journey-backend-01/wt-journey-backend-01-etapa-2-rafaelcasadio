@@ -28,6 +28,7 @@ const remove = (id) => {
     agentes.splice(index, 1);
     return true;
   }
+  return false;
 };
 
 module.exports = { findAll, findById, create, update, remove };
