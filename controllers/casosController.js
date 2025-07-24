@@ -13,8 +13,22 @@ class ApiError extends Error {
 
 const getCasos = (req, res, next) => {
   try {
-    const casos = casosRepository.findAll();
-    if (!casos) next(new ApiError("Casos não encontrados", 404));
+    let casos = casosRepository.findAll();
+    if (casos.length === 0)
+      return next(new ApiError("Casos não encontrados", 404));
+    const { status, id } = req.query;
+    if (status) {
+      if (status !== "aberto" && status !== "solucionado")
+        return next(new ApiError('Status deve ser "aberto" ou "solucionado"'));
+      casos = casos.filter((c) => c.status === status);
+      if (casos.length === 0) next(new ApiError("Casos não encontrados", 404));
+    }
+    if (id) {
+      if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+      casos = casos.filter((c) => c.agente_id === id);
+      if (casos.length === 0)
+        return next(new ApiError("Casos não encontrados", 404));
+    }
     res.status(200).json(casos);
   } catch (error) {
     next(new ApiError("Erro ao listar casos."));
@@ -23,10 +37,10 @@ const getCasos = (req, res, next) => {
 
 const getCasoById = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const caso = casosRepository.findById(id);
-    if (!caso) next(new ApiError("Caso não encontrado", 404));
+    if (!caso) return next(new ApiError("Caso não encontrado", 404));
     res.status(200).json(caso);
   } catch (error) {
     next(new ApiError("Erro ao listar caso po id."));
@@ -38,7 +52,7 @@ const createCaso = (req, res, next) => {
     const data = casoSchema.parse(req.body);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
-      next(
+      return next(
         new ApiError("Agente não encontrado para o agente_id informado", 404)
       );
     const caso = casosRepository.create(data);
@@ -50,12 +64,12 @@ const createCaso = (req, res, next) => {
 
 const updateCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const data = casoSchema.parse(req.body);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
-      next(
+      return next(
         new ApiError("Agente não encontrado para o agente_id informado", 404)
       );
     const updated = casosRepository.update(id, data);
@@ -68,18 +82,18 @@ const updateCaso = (req, res, next) => {
 
 const patchCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const data = casoSchema.partial().parse(req.body);
     if (data.agente_id) {
       const agenteExiste = agentesRepository.findById(data.agente_id);
       if (!agenteExiste)
-        next(
+        return next(
           new ApiError("Agente não encontrado para o agente_id informado", 404)
         );
     }
     const updated = casosRepository.update(id, data);
-    if (!updated) next(new ApiError("Caso não encontrado.", 404));
+    if (!updated) return next(new ApiError("Caso não encontrado.", 404));
     res.status(200).json(updated);
   } catch (error) {
     next(new ApiError(error.message, 400));
@@ -88,10 +102,10 @@ const patchCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const removed = casosRepository.remove(id);
-    if (!removed) next(new ApiError("Caso não encontrado.", 404));
+    if (!removed) return next(new ApiError("Caso não encontrado.", 404));
     res.status(204).send();
   } catch (error) {
     next(new ApiError("Erro ao remover caso.", 500));
