@@ -1,5 +1,6 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
+const { validate: isUuid } = require("uuid");
 
 class ApiError extends Error {
   constructor(message, statusCode = 500) {
@@ -20,11 +21,13 @@ const getAgentes = (req, res, next) => {
 
 const getAgenteById = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const agente = agentesRepository.findById(id);
+    if (!agente) next(new ApiError("Agente não encontrado", 404));
     res.status(200).json(agente);
   } catch (error) {
-    next(new ApiError("Erro ao listar agente po id."));
+    next(new ApiError("Erro ao listar agente por id."));
   }
 };
 
@@ -40,10 +43,11 @@ const createAgente = (req, res, next) => {
 
 const updateAgente = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const data = agenteSchema.parse(req.body);
     const updated = agentesRepository.update(id, data);
-    if (!updated) return next(new ApiError("Agente não encontrado.", 404));
+    if (!updated) next(new ApiError("Agente não encontrado.", 404));
     res.status(200).json(updated);
   } catch (error) {
     next(new ApiError(error.message, 400));
@@ -52,9 +56,10 @@ const updateAgente = (req, res, next) => {
 
 const deleteAgente = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const removed = agentesRepository.remove(id);
-    if (!removed) return next(new ApiError("Agente não encontrado.", 404));
+    if (!removed) next(new ApiError("Agente não encontrado.", 404));
     res.status(204).send();
   } catch (error) {
     next(new ApiError("Erro ao remover agente.", 500));
