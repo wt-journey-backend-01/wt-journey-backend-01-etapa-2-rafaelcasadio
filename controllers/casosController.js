@@ -21,7 +21,7 @@ const getCasos = (req, res, next) => {
       if (status !== "aberto" && status !== "solucionado")
         return next(new ApiError('Status deve ser "aberto" ou "solucionado"'));
       casos = casos.filter((c) => c.status === status);
-      if (casos.length === 0) next(new ApiError("Casos não encontrados", 404));
+      if (casos.length === 0) return next(new ApiError("Casos não encontrados", 404));
     }
     if (id) {
       if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
@@ -73,7 +73,7 @@ const updateCaso = (req, res, next) => {
         new ApiError("Agente não encontrado para o agente_id informado", 404)
       );
     const updated = casosRepository.update(id, data);
-    if (!updated) next(new ApiError("Caso não encontrado.", 404));
+    if (!updated) return next(new ApiError("Caso não encontrado.", 404));
     res.status(200).json(updated);
   } catch (error) {
     next(new ApiError(error.message, 400));
