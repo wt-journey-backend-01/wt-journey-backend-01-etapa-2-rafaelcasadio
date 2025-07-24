@@ -21,7 +21,7 @@ const update = (id, data) => {
   return null;
 };
 
-const remove = (id, data) => {
+const remove = (id) => {
   const index = casos.findIndex((c) => c.id === id);
   if (index !== -1) {
     casos.splice(index, 1);

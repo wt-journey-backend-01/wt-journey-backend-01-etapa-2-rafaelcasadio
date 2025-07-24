@@ -1,6 +1,6 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
-const { validate: isUuid } = require("uuid");
+const { validate: isUuid, validate } = require("uuid");
 
 class ApiError extends Error {
   constructor(message, statusCode = 500) {
@@ -48,9 +48,12 @@ const getAgentes = (req, res, next) => {
 
 const getAgenteById = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const agente = agentesRepository.findById(id);
+    if (!agente) {
+      return next(new ApiError("Agente não encontrado", 404));
+    }
     res.status(200).json(agente);
   } catch (error) {
     next(new ApiError("Erro ao listar agente por id."));
@@ -69,7 +72,7 @@ const createAgente = (req, res, next) => {
 
 const updateAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const data = agenteSchema.parse(req.body);
     const updated = agentesRepository.update(id, data);
@@ -82,7 +85,7 @@ const updateAgente = (req, res, next) => {
 
 const patchAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const data = agenteSchema.partial().parse(req.body);
     const updated = agentesRepository.update(id, data);
@@ -95,7 +98,7 @@ const patchAgente = (req, res, next) => {
 
 const deleteAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!isUuid(id)) return next(new ApiError("Id Inválido", 400));
+  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
   try {
     const removed = agentesRepository.remove(id);
     if (!removed) return next(new ApiError("Agente não encontrado.", 404));
