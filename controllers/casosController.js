@@ -54,6 +54,19 @@ const updateCaso = (req, res, next) => {
   }
 };
 
+const patchCaso = (req, res, next) => {
+  const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
+  try {
+    const data = casoSchema.partial().parse(req.body);
+    const updated = casosRepository.update(id, data);
+    if (!updated) next(new ApiError("Caso não encontrado.", 404));
+    res.status(200).json(updated);
+  } catch (error) {
+    next(new ApiError(error.message, 400));
+  }
+};
+
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
@@ -71,5 +84,6 @@ module.exports = {
   getCasoById,
   createCaso,
   updateCaso,
+  patchCaso,
   deleteCaso,
 };
