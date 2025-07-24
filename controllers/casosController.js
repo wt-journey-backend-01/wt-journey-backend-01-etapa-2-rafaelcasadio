@@ -1,5 +1,6 @@
 const casosRepository = require("../repositories/casosRepository");
 const { casoSchema } = require("../utils/casoValidation");
+const { validate: isUuid } = require("uuid");
 
 class ApiError extends Error {
   constructor(message, statusCode = 500) {
@@ -20,8 +21,10 @@ const getCasos = (req, res, next) => {
 
 const getCasoById = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const caso = casosRepository.findById(id);
+    if (!caso) next(new ApiError("Caso não encontrado", 404));
     res.status(200).json(caso);
   } catch (error) {
     next(new ApiError("Erro ao listar caso po id."));
@@ -40,10 +43,11 @@ const createCaso = (req, res, next) => {
 
 const updateCaso = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const data = casoSchema.parse(req.body);
     const updated = casosRepository.update(id, data);
-    if (!updated) return next(new ApiError("Caso não encontrado.", 404));
+    if (!updated) next(new ApiError("Caso não encontrado.", 404));
     res.status(200).json(updated);
   } catch (error) {
     next(new ApiError(error.message, 400));
@@ -52,9 +56,10 @@ const updateCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
+  if (!isUuid(id)) next(new ApiError("Id Inválido", 400));
   try {
     const removed = casosRepository.remove(id);
-    if (!removed) return next(new ApiError("Caso não encontrado.", 404));
+    if (!removed) next(new ApiError("Caso não encontrado.", 404));
     res.status(204).send();
   } catch (error) {
     next(new ApiError("Erro ao remover caso.", 500));
