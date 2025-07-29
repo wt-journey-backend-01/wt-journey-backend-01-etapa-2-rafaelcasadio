@@ -1,36 +1,33 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 4 créditos restantes para usar o sistema de feedback AI.
+Você tem 3 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para rafaelcasadio:
 
 Nota final: **28.1/100**
 
-# Feedback para o Rafaelcasadio 🚓✨
-
-Olá, Rafael! Antes de tudo, parabéns pelo empenho em construir essa API para o Departamento de Polícia! 👏 É um desafio e tanto, e você já fez um ótimo trabalho estruturando seu projeto e implementando várias funcionalidades importantes. Vamos juntos analisar o que está indo bem e onde podemos melhorar para deixar sua API tinindo! 💪
+Olá, Rafael! 👋🚓 Que jornada você está trilhando com essa API para o Departamento de Polícia! Antes de mais nada, parabéns por todo o esforço e por ter avançado bastante nessa construção. 🎉 Você já tem uma base sólida, com rotas, controllers, repositórios, validação e até Swagger configurado — isso é ótimo! Agora vamos juntos destrinchar alguns pontos que podem te ajudar a subir ainda mais de nível! 💪✨
 
 ---
 
-## 🎉 Pontos Fortes que Merecem Destaque
+## 🎯 O que você já mandou bem
 
-- Sua organização de arquivos está excelente e segue a arquitetura modular que o desafio pede: você separou bem as rotas, controllers e repositories, o que é fundamental para manter o projeto escalável e fácil de manter. 👏
-
-- Você implementou os endpoints para **agentes** e **casos** com todos os métodos HTTP principais (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`). Isso mostra que você entendeu a estrutura básica da API RESTful.
-
-- O uso do `zod` para validação dos dados está muito bem aplicado, principalmente para garantir que os payloads estejam no formato esperado. Isso é fundamental para a robustez da API.
-
-- Você já fez um ótimo trabalho implementando filtros simples, especialmente a filtragem de casos por keywords no título e descrição, o que é um bônus super legal! 👏👏
-
-- O tratamento de erros está presente, com mensagens customizadas e códigos de status corretos para vários cenários (400, 404, 500). Isso ajuda muito na experiência do consumidor da API.
+- Você organizou seu projeto seguindo a arquitetura modular: rotas, controllers, repositories, utils e docs estão todos em seus lugares certos. Isso é fundamental para manter o código limpo e escalável. 👏  
+- Implementou a maioria dos endpoints para os recursos `/agentes` e `/casos` com seus métodos HTTP corretos.  
+- Usou o Zod para validação dos dados de entrada, garantindo que payloads mal formatados recebam um erro 400. Isso é super importante para a robustez da API!  
+- Implementou tratamento de erros com mensagens personalizadas e status codes adequados na maior parte do código.  
+- Conseguimos ver que você implementou um endpoint de busca simples por palavras-chave nos casos (`/casos/search`), que é um bônus bacana! 🔎  
+- Swagger está configurado, o que ajuda muito na documentação e testes manuais.
 
 ---
 
-## 🕵️‍♂️ Análise Profunda dos Pontos de Melhoria
+## 🕵️ Análise dos pontos que precisam de atenção
 
-### 1. **IDs dos agentes e casos não estão no formato UUID como esperado**
+### 1. IDs precisam ser UUIDs válidos — e isso impacta tudo!
 
-Ao analisar seu código, percebi que você utiliza a biblioteca `uuid` para gerar IDs novos, o que é ótimo. Por exemplo, no `agentesRepository.js`:
+Eu percebi que a penalidade principal no seu código foi sobre a **validação dos IDs** usados para agentes e casos. Você está usando o pacote `uuid` e a função `validate` para checar os IDs, o que é ótimo. Porém, ao analisar seus repositórios, notei que o ID criado para os agentes não está usando o nome correto da variável, e isso pode estar causando confusão.
+
+Por exemplo, no `agentesRepository.js`:
 
 ```js
 const create = (data) => {
@@ -40,45 +37,49 @@ const create = (data) => {
 };
 ```
 
-Porém, a penalidade detectada indica que os IDs usados para agentes e casos **não estão no formato UUID**. Isso sugere que, em algum momento, você pode estar usando IDs que não são UUIDs, ou talvez esteja testando com IDs estáticos que não seguem esse padrão.
+Aqui você criou um objeto chamado `novoCaso` para um agente — o nome da variável confunde o propósito e pode gerar erros lógicos. Além disso, não vi nenhum problema direto com o UUID gerado, mas o fato de ter essa confusão no nome pode levar a erros futuros.
 
-**Por que isso é importante?**  
-O desafio exige que os IDs sejam UUIDs para garantir unicidade e segurança. Além disso, suas validações no controller usam a função `validate` da biblioteca `uuid` para checar se o ID é válido:
+**Sugestão:** padronize a nomenclatura para evitar confusão, assim:
 
 ```js
-if (!validate(id)) return next(new ApiError("Id Inválido", 400));
+const create = (data) => {
+  const novoAgente = { id: uuidv4(), ...data };
+  agentes.push(novoAgente);
+  return novoAgente;
+};
 ```
 
-Se os IDs não forem UUIDs, o sistema vai rejeitar as requisições por considerá-los inválidos.
+O mesmo vale para o `casosRepository.js`:
 
-**Como corrigir?**  
-- Certifique-se de que todos os IDs gerados e usados na API sejam UUIDs válidos.  
-- Evite usar IDs estáticos ou numéricos nos testes manuais.  
-- Se estiver populando dados iniciais manualmente, gere UUIDs para eles.  
+```js
+const create = (data) => {
+  const novoCaso = { id: uuidv4(), ...data };
+  casos.push(novoCaso);
+  return novoCaso;
+};
+```
 
-Recomendo fortemente revisar o conceito de UUID e como usá-los no Node.js com a biblioteca [uuid](https://www.npmjs.com/package/uuid).
+Isso é só para clareza, mas o mais importante é garantir que o ID gerado seja sempre um UUID válido e que o cliente use esse formato para consultar e manipular os dados.
 
-👉 Para entender melhor UUID e validação, veja este recurso:  
-[MDN - UUID e validação](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400) (para entender status 400) e  
-[Documentação do uuid no npm](https://www.npmjs.com/package/uuid).
+**Por que isso é crucial?**  
+Se os IDs não forem UUIDs válidos, suas validações com `validate(id)` vão falhar, e isso vai impedir que as operações funcionem corretamente, gerando erros 400 ou 404. É o que eu vi acontecendo nas suas rotas, onde muitos endpoints retornam erro de ID inválido.
 
 ---
 
-### 2. **Filtros e ordenação dos agentes e casos**
+### 2. Endpoints de filtragem e busca precisam estar consistentes e completos
 
-Você implementou filtros básicos, como o filtro de cargo para agentes e status para casos, e até o filtro por keywords no título e descrição dos casos — muito bom! 👏
+Você implementou o endpoint `/casos/search` para busca por palavras-chave, e isso está muito legal! Porém, percebi que os filtros simples por `status` e `agente_id` no endpoint `/casos` não passaram, e o mesmo vale para os filtros e ordenação no endpoint `/agentes`.
 
-Porém, os filtros mais complexos, como:
-
-- Ordenação por data de incorporação dos agentes (ascendente e descendente)
-- Filtro por agente responsável nos casos
-- Mensagens de erro customizadas para argumentos inválidos
-
-não estão totalmente implementados ou não estão funcionando conforme esperado.
-
-Ao analisar o método `getAgentes` no controller, por exemplo:
+No seu `agentesController.js`:
 
 ```js
+if (cargo) {
+  if (cargo !== "inspetor" && cargo !== "delegado")
+    return next(
+      new ApiError('Cargo deve ser "inspetor" ou "delegado"', 400)
+    );
+  agentes = agentes.filter((a) => a.cargo === cargo);
+}
 if (sort) {
   if (sort !== "dataDeIncorporacao" && sort !== "-dataDeIncorporacao")
     return next(
@@ -100,108 +101,111 @@ if (sort) {
 }
 ```
 
-A lógica está correta, mas o teste indica que pode haver algum problema com os dados ou com o teste do endpoint. Verifique se os dados de `dataDeIncorporacao` estão sendo inseridos corretamente e no formato de data válido para que a ordenação funcione.
+O código parece correto, mas no feedback de testes, esses filtros não passaram. Isso me faz suspeitar que:
 
-Além disso, no filtro de casos por agente, você usa o parâmetro `id` na query para filtrar casos pelo `agente_id`, o que está correto:
+- Ou o dado `dataDeIncorporacao` não está sendo armazenado/formatado corretamente nos agentes (por exemplo, strings que não são datas válidas),  
+- Ou o endpoint `/agentes` não está sendo chamado corretamente com os query params esperados,  
+- Ou ainda que os testes esperam uma ordenação estável e o método `.sort()` está modificando o array original de forma inesperada.
+
+**Dica:** Para garantir que o array original não seja modificado, você pode clonar ele antes do sort:
 
 ```js
-if (id) {
-  if (!validate(id)) return next(new ApiError("Id Inválido", 400));
-  casos = casos.filter((c) => c.agente_id === id);
+agentes = [...agentes];
+```
+
+antes de chamar o `.sort()`.
+
+Além disso, valide se os dados que você cria para agentes possuem o campo `dataDeIncorporacao` com formato ISO ou Date válido.
+
+---
+
+### 3. Tratamento de erros customizados está quase lá, mas pode melhorar
+
+Você criou a classe `ApiError` que ajuda a padronizar os erros com mensagens e status code, isso é ótimo! Porém, percebi que em alguns catch blocks você não está propagando o erro original, e em outros está retornando mensagens genéricas.
+
+Por exemplo, em `agentesController.js`:
+
+```js
+catch (error) {
+  next(new ApiError("Erro ao listar agentes."));
 }
 ```
 
-Mas o teste indica que esse filtro não está funcionando perfeitamente. Talvez o parâmetro esperado para o filtro seja diferente (por exemplo, `agente_id` em vez de `id`), ou a rota/documentação não esteja clara para o consumidor da API.
+Aqui você perde a mensagem original do erro, o que dificulta o debug e pode deixar o cliente sem saber o que aconteceu.
 
-**Dica:** Confirme com os testes e documentação qual é o nome do parâmetro correto para filtrar casos pelo agente, e garanta que a validação e o filtro estejam alinhados.
-
----
-
-### 3. **Mensagens de erro customizadas para argumentos inválidos**
-
-Você fez um ótimo trabalho incluindo mensagens customizadas para erros, como:
+**Sugestão:** passe a mensagem do erro original para o `ApiError` para facilitar o entendimento:
 
 ```js
-return next(new ApiError('Cargo deve ser "inspetor" ou "delegado"', 400));
+catch (error) {
+  next(new ApiError(error.message || "Erro ao listar agentes."));
+}
 ```
 
-No entanto, os testes apontam que essas mensagens não estão 100% alinhadas com o esperado, o que pode ser questão de texto exato, formatação ou status code.
-
-Para garantir que as mensagens de erro estejam sempre consistentes e amigáveis, recomendo:
-
-- Centralizar as mensagens de erro em um arquivo ou objeto para facilitar a manutenção.  
-- Conferir se o texto das mensagens bate exatamente com o esperado (às vezes, um pequeno detalhe pode fazer a diferença).  
-- Usar schemas do `zod` para validar e customizar mensagens de erro diretamente na validação, assim o erro já sai formatado.
+Isso também se aplica para os demais controllers.
 
 ---
 
-### 4. **Arquitetura e organização**
+### 4. Validação de IDs no controller — cuidado com importação duplicada
 
-Sua estrutura de pastas e arquivos está muito boa e condiz com o esperado para o desafio, veja:
+Nos seus controllers, você importa o `validate` do `uuid` assim:
 
-```
-├── controllers/
-│   ├── agentesController.js
-│   └── casosController.js
-├── repositories/
-│   ├── agentesRepository.js
-│   └── casosRepository.js
-├── routes/
-│   ├── agentesRoutes.js
-│   └── casosRoutes.js
-├── utils/
-│   ├── agenteValidation.js
-│   ├── casoValidation.js
-│   └── errorHandler.js
-├── docs/
-│   └── swagger.js
-├── server.js
+```js
+const { validate: isUuid, validate } = require("uuid");
 ```
 
-Isso é perfeito para manter a escalabilidade do projeto e facilitar a manutenção. Continue assim! 🚀
+Mas aí você usa `validate(id)` em vários lugares, e às vezes `isUuid` (que não é usado). Isso pode confundir.
+
+**Sugestão:** importe só o que vai usar, e use um nome consistente:
+
+```js
+const { validate } = require("uuid");
+```
+
+e depois use sempre `validate(id)` para validar UUID.
 
 ---
 
-## 💡 Recomendações para você avançar com confiança
+### 5. Organização do código e nomenclaturas
 
-- **UUID e Validação de IDs:**  
-  Estude mais sobre UUIDs e como validá-los corretamente no Express.js. Isso vai destravar muitos erros relacionados a IDs inválidos.  
-  Veja este vídeo para fundamentos de API REST e Express.js, incluindo rotas e validação:  
-  [Fundamentos de API REST e Express.js](https://youtu.be/RSZHvQomeKE)  
-  E para entender melhor o tratamento de erros 400 e 404:  
-  [Status 400 e 404 no MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400) e  
-  [Status 404 no MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404)
-
-- **Filtros e Ordenação:**  
-  Para manipular arrays com filtros e ordenações complexas, revise os métodos do JavaScript como `filter()`, `sort()` e `includes()`.  
-  Este vídeo é ótimo para manipulação de arrays em JS:  
-  [Manipulação de Arrays em JavaScript](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI)
-
-- **Arquitetura MVC e Organização:**  
-  Para consolidar o entendimento da arquitetura que você já está usando, recomendo assistir:  
-  [Arquitetura MVC em Node.js](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)  
-
-- **Tratamento de erros e validação com Zod:**  
-  Para melhorar ainda mais a validação e mensagens de erro, veja este vídeo que explica como fazer validação robusta em APIs Node.js com Zod:  
-  [Validação de dados em APIs Node.js](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_)
+No geral, seu projeto está bem organizado, mas alguns nomes de variáveis e funções podem ser revisitados para garantir clareza e evitar confusão (como o exemplo do `novoCaso` para agentes). Isso ajuda na manutenção e no entendimento do código.
 
 ---
 
-## 🔍 Resumo Rápido do Que Focar para Melhorar
+## 📚 Recursos para você se aprofundar e corrigir esses pontos
 
-- [ ] Garantir que todos os IDs gerados e usados sejam UUIDs válidos e consistentes.  
-- [ ] Revisar e ajustar filtros e ordenação para agentes e casos, garantindo que os parâmetros e a lógica estejam alinhados com o esperado.  
-- [ ] Refinar mensagens de erro para que estejam claras e exatamente conforme o esperado, centralizando-as para facilitar manutenção.  
-- [ ] Confirmar que os dados usados para testes (como datas e IDs) estejam no formato correto para que filtros e validações funcionem.  
-- [ ] Continuar explorando a arquitetura modular que você já estruturou, para manter o código organizado e escalável.
+- Para entender melhor o uso do Express e organização das rotas/controllers:  
+  https://expressjs.com/pt-br/guide/routing.html  
+  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH (Arquitetura MVC em Node.js)
+
+- Para validar UUIDs corretamente e entender o pacote uuid:  
+  https://www.npmjs.com/package/uuid#uuidvalidateid
+
+- Para manipulação correta de arrays e evitar efeitos colaterais com `.sort()`:  
+  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
+
+- Para tratamento de erros e status HTTP:  
+  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400  
+  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404
+
+- Para entender melhor o fluxo de requisição/resposta no Express.js:  
+  https://youtu.be/Bn8gcSQH-bc?si=Df4htGoVrV0NR7ri
 
 ---
 
-Rafael, você está no caminho certo! 🚀 A jornada de aprendizado em APIs é cheia de detalhes, e cada ajuste que você fizer vai deixar seu código mais sólido e profissional. Continue praticando, revisando seu código com calma e buscando entender cada parte do funcionamento da sua API. Você tem uma base muito boa, e com esses ajustes vai alcançar um nível ainda mais alto! 💪
+## 📝 Resumo rápido para você focar:
 
-Qualquer dúvida, pode contar comigo para te ajudar! Vamos juntos nessa! 😉
+- **IDs devem ser UUIDs válidos e gerados corretamente; padronize nomes das variáveis para evitar confusão (ex: `novoAgente` em vez de `novoCaso` para agentes).**  
+- **Garanta que os dados possuem os campos necessários com formato correto, especialmente `dataDeIncorporacao` para agentes.**  
+- **No filtro e ordenação, clone o array antes de ordenar para evitar efeitos colaterais.**  
+- **Melhore o tratamento de erros para propagar mensagens originais do erro, facilitando o debug.**  
+- **Simplifique e padronize a importação e uso da função `validate` do pacote `uuid`.**  
+- **Continue explorando e testando os filtros e buscas para os endpoints de casos e agentes, garantindo que todos os query params funcionem conforme esperado.**
 
-Abraço forte e sucesso! 👊✨
+---
+
+Rafael, você está no caminho certo! 🚀 Com esses ajustes, sua API vai ficar muito mais robusta e alinhada com as boas práticas. Continue assim, revisando com calma cada detalhe e testando bastante. Qualquer dúvida, estou aqui para ajudar! 🤝
+
+Boa codificação e até a próxima! 👮‍♂️👩‍💻✨
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
