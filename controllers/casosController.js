@@ -14,15 +14,17 @@ class ApiError extends Error {
 const getCasos = (req, res, next) => {
   try {
     let casos = casosRepository.findAll();
-    const { status, id } = req.query;
+    const { status, agente_id } = req.query;
     if (status) {
       if (status !== "aberto" && status !== "solucionado")
-        return next(new ApiError('Status deve ser "aberto" ou "solucionado"', 400));
+        return next(
+          new ApiError('Status deve ser "aberto" ou "solucionado"', 400)
+        );
       casos = casos.filter((c) => c.status === status);
     }
-    if (id) {
-      if (!validate(id)) return next(new ApiError("Id Inválido", 400));
-      casos = casos.filter((c) => c.agente_id === id);
+    if (agente_id) {
+      if (!validate(agente_id)) return next(new ApiError("Id Inválido", 400));
+      casos = casos.filter((c) => c.agente_id === agente_id);
     }
     res.status(200).json(casos);
   } catch (error) {
@@ -41,6 +43,39 @@ const getCasoById = (req, res, next) => {
     res.status(200).json(caso);
   } catch (error) {
     next(new ApiError("Erro ao listar caso po id."));
+  }
+};
+
+const getAgenteByCasoId = (req, res, next) => {
+  const { caso_id } = req.params;
+  if (!validate(caso_id)) return next(new ApiError("Id inválido", 400));
+  try {
+    const caso = casosRepository.findById(caso_id);
+    if (!caso) return next(new ApiError("Caso não encontrado", 404));
+    const agente = agentesRepository.findById(caso.agente_id);
+    res.status(200).json(agente);
+  } catch (error) {
+    next(new ApiError("Erro ao buscar agente do caso."));
+  }
+};
+
+const searchCasos = (req, res, next) => {
+  let { q } = req.query;
+  q = q.toLowerCase();
+  if (!q || typeof q !== "string" || q.trim() === "") {
+    return next(new ApiError("Query de busca inválida", 400));
+  }
+  try {
+    const casos = casosRepository.findAll();
+    const termo = q.toLowerCase();
+    const resultados = casos.filter(
+      (c) =>
+        c.titulo.toLowerCase().includes(termo) ||
+        c.descricao.toLowerCase().includes(termo)
+    );
+    res.status(200).json(resultados);
+  } catch (error) {
+    next(new ApiError("Erro ao buscar casos.", 500));
   }
 };
 
@@ -116,4 +151,6 @@ module.exports = {
   updateCaso,
   patchCaso,
   deleteCaso,
+  getAgenteByCasoId,
+  searchCasos,
 };
