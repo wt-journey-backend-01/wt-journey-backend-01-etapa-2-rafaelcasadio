@@ -1,7 +1,7 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 const { casoSchema } = require("../utils/casoValidation");
-const { validate: isUuid, validate } = require("uuid");
+const { validate } = require("uuid");
 
 class ApiError extends Error {
   constructor(message, statusCode = 500) {
@@ -20,15 +20,15 @@ const getCasos = (req, res, next) => {
         return next(
           new ApiError('Status deve ser "aberto" ou "solucionado"', 400)
         );
-      casos = casos.filter((c) => c.status === status);
+      casos = [...casos].filter((c) => c.status === status);
     }
     if (agente_id) {
       if (!validate(agente_id)) return next(new ApiError("Id Inválido", 400));
-      casos = casos.filter((c) => c.agente_id === agente_id);
+      casos = [...casos].filter((c) => c.agente_id === agente_id);
     }
     res.status(200).json(casos);
   } catch (error) {
-    next(new ApiError("Erro ao listar casos."));
+    next(new ApiError(error.message));
   }
 };
 
@@ -42,7 +42,7 @@ const getCasoById = (req, res, next) => {
     }
     res.status(200).json(caso);
   } catch (error) {
-    next(new ApiError("Erro ao listar caso po id."));
+    next(new ApiError(error.message));
   }
 };
 
@@ -55,7 +55,7 @@ const getAgenteByCasoId = (req, res, next) => {
     const agente = agentesRepository.findById(caso.agente_id);
     res.status(200).json(agente);
   } catch (error) {
-    next(new ApiError("Erro ao buscar agente do caso."));
+    next(new ApiError(error.message));
   }
 };
 
@@ -75,7 +75,7 @@ const searchCasos = (req, res, next) => {
     );
     res.status(200).json(resultados);
   } catch (error) {
-    next(new ApiError("Erro ao buscar casos.", 500));
+    next(new ApiError(error.message));
   }
 };
 
@@ -140,7 +140,7 @@ const deleteCaso = (req, res, next) => {
     if (!removed) return next(new ApiError("Caso não encontrado.", 404));
     res.status(204).send();
   } catch (error) {
-    next(new ApiError("Erro ao remover caso.", 500));
+    next(new ApiError(error.message));
   }
 };
 

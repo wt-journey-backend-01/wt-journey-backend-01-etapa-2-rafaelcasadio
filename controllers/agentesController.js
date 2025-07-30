@@ -1,6 +1,6 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
-const { validate: isUuid, validate } = require("uuid");
+const { validate } = require("uuid");
 
 class ApiError extends Error {
   constructor(message, statusCode = 500) {
@@ -19,9 +19,14 @@ const getAgentes = (req, res, next) => {
         return next(
           new ApiError('Cargo deve ser "inspetor" ou "delegado"', 400)
         );
-      agentes = agentes.filter((a) => a.cargo === cargo);
+      agentes = [...agentes].filter((a) => a.cargo === cargo);
     }
     if (sort) {
+      console.log("Sort solicitado:", sort);
+      console.log(
+        "Datas antes do sort:",
+        agentes.map((a) => a.dataDeIncorporacao)
+      );
       if (sort !== "dataDeIncorporacao" && sort !== "-dataDeIncorporacao")
         return next(
           new ApiError(
@@ -30,19 +35,19 @@ const getAgentes = (req, res, next) => {
           )
         );
       if (sort === "dataDeIncorporacao")
-        agentes = agentes.sort(
+        agentes = [...agentes].sort(
           (a, b) =>
             new Date(a.dataDeIncorporacao) - new Date(b.dataDeIncorporacao)
         );
       else if (sort === "-dataDeIncorporacao")
-        agentes = agentes.sort(
+        agentes = [...agentes].sort(
           (a, b) =>
             new Date(b.dataDeIncorporacao) - new Date(a.dataDeIncorporacao)
         );
     }
     res.status(200).json(agentes);
   } catch (error) {
-    next(new ApiError("Erro ao listar agentes."));
+    next(new ApiError(error.message));
   }
 };
 
@@ -56,7 +61,7 @@ const getAgenteById = (req, res, next) => {
     }
     res.status(200).json(agente);
   } catch (error) {
-    next(new ApiError("Erro ao listar agente por id."));
+    next(new ApiError(error.message));
   }
 };
 
@@ -104,7 +109,7 @@ const deleteAgente = (req, res, next) => {
     if (!removed) return next(new ApiError("Agente não encontrado.", 404));
     res.status(204).send();
   } catch (error) {
-    next(new ApiError("Erro ao remover agente.", 500));
+    next(new ApiError(error.message));
   }
 };
 
