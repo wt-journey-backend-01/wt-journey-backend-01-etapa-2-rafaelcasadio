@@ -77,8 +77,7 @@ const searchCasos = (req, res, next) => {
 
 const createCaso = (req, res, next) => {
   try {
-    const { id, ...rest } = req.body;
-    const data = casoSchema.parse(rest);
+    const data = casoSchema.parse(req.body);
     if (!validate(data.agente_id))
       throw new ApiError("agente_id deve ser um UUID válido", 400);
     const agenteExiste = agentesRepository.findById(data.agente_id);
