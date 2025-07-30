@@ -87,8 +87,6 @@ const createCaso = (req, res, next) => {
       throw new ApiError("Não é permitido definir o ID do caso", 400);
     }
     const data = casoSchema.parse(req.body);
-    if (!isValidUUID(data.agente_id))
-      throw new ApiError("agente_id deve ser um UUID válido", 400);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
       throw new ApiError(

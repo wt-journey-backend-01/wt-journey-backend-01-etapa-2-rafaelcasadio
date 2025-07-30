@@ -14,7 +14,10 @@ const casoSchema = z.object({
     invalid_type_error: 'Status deve ser "aberto" ou "solucionado".',
   }),
 
-  agente_id: z.uuid({ message: "ID deve ser um UUID válido" }),
+  agente_id: z.uuid({
+    required_error: "ID do agente é obrigatório.",
+    message: "ID deve ser um UUID válido",
+  }),
 });
 
 module.exports = { casoSchema };
