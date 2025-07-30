@@ -1,10 +1,10 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
-const validator = require('validator');
+const validator = require("validator");
 const { ApiError } = require("../utils/errorHandler");
 
 function isValidUUID(uuid) {
-    return validator.isUUID(uuid);
+  return validator.isUUID(uuid);
 }
 
 const getAgentes = (req, res, next) => {
@@ -12,7 +12,9 @@ const getAgentes = (req, res, next) => {
     let agentes = agentesRepository.findAll();
     const { cargo, sort } = req.query;
     if (cargo) {
-      agentes = [...agentes].filter((a) => a.cargo.toLocaleLowerCase() === cargo.toLocaleLowerCase());
+      agentes = [...agentes].filter(
+        (a) => a.cargo.toLocaleLowerCase() === cargo.toLocaleLowerCase()
+      );
     }
     if (sort) {
       agentes = agentes.filter(
@@ -70,7 +72,8 @@ const updateAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const data = agenteSchema.parse(req.body);
+    const { id: _, ...rest } = req.body;
+    const data = agenteSchema.parse(rest);
     const updated = agentesRepository.update(id, data);
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);
@@ -83,7 +86,8 @@ const patchAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const data = agenteSchema.partial().parse(req.body);
+    const { id: _, ...rest } = req.body;
+    const data = agenteSchema.partial().parse(rest);
     const updated = agentesRepository.update(id, data);
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);

@@ -1,11 +1,11 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 const { casoSchema } = require("../utils/casoValidation");
-const validator = require('validator');
+const validator = require("validator");
 const { ApiError } = require("../utils/errorHandler");
 
 function isValidUUID(uuid) {
-    return validator.isUUID(uuid);
+  return validator.isUUID(uuid);
 }
 
 const getCasos = (req, res, next) => {
@@ -47,7 +47,8 @@ const getCasoById = (req, res, next) => {
 
 const getAgenteByCasoId = (req, res, next) => {
   const { caso_id } = req.params;
-  if (!isValidUUID(caso_id)) throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(caso_id))
+    throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const caso = casosRepository.findById(caso_id);
     if (!caso) throw new ApiError("Caso não encontrado", 404);
@@ -101,7 +102,8 @@ const updateCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const data = casoSchema.parse(req.body);
+    const { id: _, ...rest } = req.body;
+    const data = agenteSchema.parse(rest);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
       throw new ApiError(
@@ -120,7 +122,8 @@ const patchCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const data = casoSchema.partial().parse(req.body);
+    const { id: _, ...rest } = req.body;
+    const data = agenteSchema.partial().parse(rest);
     if (data.agente_id) {
       const agenteExiste = agentesRepository.findById(data.agente_id);
       if (!agenteExiste)
@@ -139,8 +142,7 @@ const patchCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!isValidUUID(id))
-    throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const removed = casosRepository.remove(id);
     if (!removed) throw new ApiError("Caso não encontrado.", 404);
