@@ -34,7 +34,7 @@ const getCasos = (req, res, next) => {
 
 const getCasoById = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const caso = casosRepository.findById(id);
     if (!caso) {
@@ -48,7 +48,7 @@ const getCasoById = (req, res, next) => {
 
 const getAgenteByCasoId = (req, res, next) => {
   const { caso_id } = req.params;
-  if (!validate(caso_id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(caso_id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const caso = casosRepository.findById(caso_id);
     if (!caso) return next(new ApiError("Caso não encontrado", 404));
@@ -99,7 +99,7 @@ const createCaso = (req, res, next) => {
 
 const updateCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const data = casoSchema.parse(req.body);
     const agenteExiste = agentesRepository.findById(data.agente_id);
@@ -117,7 +117,7 @@ const updateCaso = (req, res, next) => {
 
 const patchCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const data = casoSchema.partial().parse(req.body);
     if (data.agente_id) {
@@ -137,7 +137,7 @@ const patchCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const removed = casosRepository.remove(id);
     if (!removed) return next(new ApiError("Caso não encontrado.", 404));

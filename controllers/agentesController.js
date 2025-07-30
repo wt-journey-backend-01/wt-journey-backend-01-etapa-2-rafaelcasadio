@@ -52,7 +52,7 @@ const getAgentes = (req, res, next) => {
 
 const getAgenteById = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const agente = agentesRepository.findById(id);
     if (!agente) {
@@ -77,7 +77,7 @@ const createAgente = (req, res, next) => {
 
 const updateAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const data = agenteSchema.parse(req.body);
     const updated = agentesRepository.update(id, data);
@@ -90,7 +90,7 @@ const updateAgente = (req, res, next) => {
 
 const patchAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const data = agenteSchema.partial().parse(req.body);
     const updated = agentesRepository.update(id, data);
@@ -103,7 +103,7 @@ const patchAgente = (req, res, next) => {
 
 const deleteAgente = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) return next(new ApiError("Id deve ser um UUID válido", 400));
+  if (!validate(id)) return next(new ApiError("ID deve ser um UUID válido", 400));
   try {
     const removed = agentesRepository.remove(id);
     if (!removed) return next(new ApiError("Agente não encontrado.", 404));
