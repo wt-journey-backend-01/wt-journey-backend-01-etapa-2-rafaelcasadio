@@ -1,6 +1,7 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
 const validator = require("validator");
+const { z } = require("zod");
 const { ApiError } = require("../utils/errorHandler");
 
 function isValidUUID(uuid) {
@@ -59,7 +60,7 @@ const getAgenteById = (req, res, next) => {
 
 const createAgente = (req, res, next) => {
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       // Não permitir criação com id customizado
       throw new ApiError("Não é permitido definir o ID do agente", 400);
     }
@@ -67,7 +68,19 @@ const createAgente = (req, res, next) => {
     const agente = agentesRepository.create(data);
     res.status(201).json(agente);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -75,7 +88,7 @@ const updateAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       throw new ApiError("Não é permitido alterar o ID do agente", 400);
     }
     const data = agenteSchema.parse(req.body);
@@ -83,7 +96,19 @@ const updateAgente = (req, res, next) => {
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -91,7 +116,7 @@ const patchAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       throw new ApiError("Não é permitido alterar o ID do agente", 400);
     }
     const data = agenteSchema.partial().parse(req.body);
@@ -99,7 +124,19 @@ const patchAgente = (req, res, next) => {
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 

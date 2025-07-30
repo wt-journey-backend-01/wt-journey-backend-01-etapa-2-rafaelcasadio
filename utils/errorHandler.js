@@ -5,7 +5,7 @@ class ApiError extends Error {
     }
 }
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => { 
     // Log do erro para desenvolvimento
     console.error('Error:', err.message);
     console.error('Stack:', err.stack);

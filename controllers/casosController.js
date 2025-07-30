@@ -2,6 +2,7 @@ const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 const { casoSchema } = require("../utils/casoValidation");
 const validator = require("validator");
+const { z } = require("zod");
 const { ApiError } = require("../utils/errorHandler");
 
 function isValidUUID(uuid) {
@@ -82,7 +83,7 @@ const searchCasos = (req, res, next) => {
 
 const createCaso = (req, res, next) => {
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       throw new ApiError("Não é permitido definir o ID do caso", 400);
     }
     const data = casoSchema.parse(req.body);
@@ -97,7 +98,19 @@ const createCaso = (req, res, next) => {
     const caso = casosRepository.create(data);
     res.status(201).json(caso);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -105,7 +118,7 @@ const updateCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       // Não permitir alteração do id
       throw new ApiError("Não é permitido alterar o ID do caso", 400);
     }
@@ -123,7 +136,19 @@ const updateCaso = (req, res, next) => {
     if (!updated) throw new ApiError("Caso não encontrado.", 404);
     res.status(200).json(updated);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -131,7 +156,7 @@ const patchCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    if ('id' in req.body) {
+    if ("id" in req.body) {
       // Não permitir alteração do id
       throw new ApiError("Não é permitido alterar o ID do caso", 400);
     }
@@ -149,7 +174,19 @@ const patchCaso = (req, res, next) => {
     if (!updated) throw new ApiError("Caso não encontrado.", 404);
     res.status(200).json(updated);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      let mensagens = "";
+      if (Array.isArray(error.errors)) {
+        mensagens = error.errors.map((e) => e.message).join("; ");
+      } else if (error.message) {
+        mensagens = error.message;
+      } else {
+        mensagens = "Erro desconhecido";
+      }
+      return next(new ApiError(`Erro de validação: ${mensagens}`, 400));
+    } else {
+      next(error);
+    }
   }
 };
 
