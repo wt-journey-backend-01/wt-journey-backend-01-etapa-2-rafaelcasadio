@@ -11,31 +11,31 @@ const agentes = [
     id: uuidv4(),
     nome: "Marina Diniz",
     dataDeIncorporacao: "2005/05/15",
-    cargo: "investigador",
+    cargo: "delegado",
   },
   {
     id: uuidv4(),
     nome: "Carlos Silva",
     dataDeIncorporacao: "2010/08/20",
-    cargo: "perito",
+    cargo: "inspetor",
   },
   {
     id: uuidv4(),
     nome: "Ana Paula",
     dataDeIncorporacao: "2018/03/12",
-    cargo: "agente",
+    cargo: "inspetor",
   },
   {
     id: uuidv4(),
     nome: "João Pedro",
     dataDeIncorporacao: "2020/11/30",
-    cargo: "auxiliar",
+    cargo: "delegado",
   },
   {
     id: uuidv4(),
     nome: "Luciana Costa",
     dataDeIncorporacao: "2019/07/22",
-    cargo: "investigador",
+    cargo: "inspetor",
   },
 ];
 

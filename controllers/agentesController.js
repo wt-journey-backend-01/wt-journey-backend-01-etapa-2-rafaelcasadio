@@ -1,6 +1,7 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { agenteSchema } = require("../utils/agenteValidation");
 const { validate } = require("uuid");
+const { ApiError } = require("../utils/errorHandler");
 
 const getAgentes = (req, res, next) => {
   try {

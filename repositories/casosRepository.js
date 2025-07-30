@@ -13,7 +13,7 @@ const casos = [
         id: uuidv4(),
         titulo: "furto",
         descricao: "Relato de furto de veículo na região central, ocorrido entre 20:00 e 21:00 do dia 11/07/2007.",
-        status: "fechado",
+        status: "solucionado",
         agente_id: "401bccf5-cf9e-489d-8412-446cd169a0f1",
         dataOcorrencia: "2007-07-11"
     },
