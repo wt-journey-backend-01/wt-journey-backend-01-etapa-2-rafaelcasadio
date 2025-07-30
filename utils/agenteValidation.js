@@ -20,6 +20,17 @@ const agenteSchema = z.object({
       {
         message: "Data inválida no calendário.",
       }
+    )
+    .refine(
+      (val) => {
+        const inputDate = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return inputDate <= today;
+      },
+      {
+        message: "Data de incorporação não pode ser no futuro.",
+      }
     ),
   cargo: z
     .string({ required_error: "Cargo é obrigatório." })
