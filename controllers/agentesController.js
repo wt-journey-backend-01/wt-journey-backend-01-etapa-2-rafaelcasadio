@@ -59,8 +59,11 @@ const getAgenteById = (req, res, next) => {
 
 const createAgente = (req, res, next) => {
   try {
-    const { id, ...rest } = req.body;
-    const data = agenteSchema.parse(rest);
+    if ('id' in req.body) {
+      // Não permitir criação com id customizado
+      throw new ApiError("Não é permitido definir o ID do agente", 400);
+    }
+    const data = agenteSchema.parse(req.body);
     const agente = agentesRepository.create(data);
     res.status(201).json(agente);
   } catch (error) {
@@ -72,8 +75,10 @@ const updateAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const { id: _, ...rest } = req.body;
-    const data = agenteSchema.parse(rest);
+    if ('id' in req.body) {
+      throw new ApiError("Não é permitido alterar o ID do agente", 400);
+    }
+    const data = agenteSchema.parse(req.body);
     const updated = agentesRepository.update(id, data);
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);
@@ -86,8 +91,10 @@ const patchAgente = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const { id: _, ...rest } = req.body;
-    const data = agenteSchema.partial().parse(rest);
+    if ('id' in req.body) {
+      throw new ApiError("Não é permitido alterar o ID do agente", 400);
+    }
+    const data = agenteSchema.partial().parse(req.body);
     const updated = agentesRepository.update(id, data);
     if (!updated) throw new ApiError("Agente não encontrado.", 404);
     res.status(200).json(updated);

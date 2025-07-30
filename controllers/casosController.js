@@ -82,6 +82,9 @@ const searchCasos = (req, res, next) => {
 
 const createCaso = (req, res, next) => {
   try {
+    if ('id' in req.body) {
+      throw new ApiError("Não é permitido definir o ID do caso", 400);
+    }
     const data = casoSchema.parse(req.body);
     if (!isValidUUID(data.agente_id))
       throw new ApiError("agente_id deve ser um UUID válido", 400);
@@ -102,8 +105,14 @@ const updateCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const { id: _, ...rest } = req.body;
-    const data = agenteSchema.parse(rest);
+    if ('id' in req.body) {
+      // Não permitir alteração do id
+      throw new ApiError("Não é permitido alterar o ID do caso", 400);
+    }
+    // Validação completa para PUT
+    const data = casoSchema.parse(req.body);
+    if (!isValidUUID(data.agente_id))
+      throw new ApiError("agente_id deve ser um UUID válido", 400);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
       throw new ApiError(
@@ -122,8 +131,12 @@ const patchCaso = (req, res, next) => {
   const { id } = req.params;
   if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
-    const { id: _, ...rest } = req.body;
-    const data = agenteSchema.partial().parse(rest);
+    if ('id' in req.body) {
+      // Não permitir alteração do id
+      throw new ApiError("Não é permitido alterar o ID do caso", 400);
+    }
+    // Validação parcial para PATCH
+    const data = casoSchema.partial().parse(req.body);
     if (data.agente_id) {
       const agenteExiste = agentesRepository.findById(data.agente_id);
       if (!agenteExiste)
