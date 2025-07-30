@@ -1,8 +1,12 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 const { casoSchema } = require("../utils/casoValidation");
-const { validate } = require("uuid");
+const validator = require('validator');
 const { ApiError } = require("../utils/errorHandler");
+
+function isValidUUID(uuid) {
+    return validator.isUUID(uuid);
+}
 
 const getCasos = (req, res, next) => {
   try {
@@ -17,7 +21,7 @@ const getCasos = (req, res, next) => {
       casos = [...casos].filter((c) => c.status === status);
     }
     if (agente_id) {
-      if (!validate(agente_id))
+      if (!isValidUUID(agente_id))
         throw new ApiError("agente_id deve ser um UUID válido", 400);
       casos = [...casos].filter((c) => c.agente_id === agente_id);
     }
@@ -29,7 +33,7 @@ const getCasos = (req, res, next) => {
 
 const getCasoById = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const caso = casosRepository.findById(id);
     if (!caso) {
@@ -43,7 +47,7 @@ const getCasoById = (req, res, next) => {
 
 const getAgenteByCasoId = (req, res, next) => {
   const { caso_id } = req.params;
-  if (!validate(caso_id)) throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(caso_id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const caso = casosRepository.findById(caso_id);
     if (!caso) throw new ApiError("Caso não encontrado", 404);
@@ -78,7 +82,7 @@ const searchCasos = (req, res, next) => {
 const createCaso = (req, res, next) => {
   try {
     const data = casoSchema.parse(req.body);
-    if (!validate(data.agente_id))
+    if (!isValidUUID(data.agente_id))
       throw new ApiError("agente_id deve ser um UUID válido", 400);
     const agenteExiste = agentesRepository.findById(data.agente_id);
     if (!agenteExiste)
@@ -95,7 +99,7 @@ const createCaso = (req, res, next) => {
 
 const updateCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const data = casoSchema.parse(req.body);
     const agenteExiste = agentesRepository.findById(data.agente_id);
@@ -114,7 +118,7 @@ const updateCaso = (req, res, next) => {
 
 const patchCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id)) throw new ApiError("ID deve ser um UUID válido", 400);
+  if (!isValidUUID(id)) throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const data = casoSchema.partial().parse(req.body);
     if (data.agente_id) {
@@ -135,7 +139,7 @@ const patchCaso = (req, res, next) => {
 
 const deleteCaso = (req, res, next) => {
   const { id } = req.params;
-  if (!validate(id))
+  if (!isValidUUID(id))
     throw new ApiError("ID deve ser um UUID válido", 400);
   try {
     const removed = casosRepository.remove(id);
