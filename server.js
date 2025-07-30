@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const agentesRoutes = require("./routes/agentesRoutes");
 const casosRoutes = require("./routes/casosRoutes");
-const errorHandler = require('./utils/errorHandler');
+const {errorHandler} = require('./utils/errorHandler');
 const setupSwagger = require('./docs/swagger');
 
 const app = express();
