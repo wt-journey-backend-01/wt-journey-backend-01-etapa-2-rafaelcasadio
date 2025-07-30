@@ -160,4 +160,25 @@ router.patch("/:id", agentesController.patchAgente);
  */
 router.delete("/:id", agentesController.deleteAgente);
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Agente:
+ *       type: object
+ *       properties:
+ *         nome:
+ *           type: string
+ *         dataDeIncorporacao:
+ *           type: string
+ *           format: date
+ *         cargo:
+ *           type: string
+ *           enum: [inspetor, delegado]
+ *       required:
+ *         - nome
+ *         - dataDeIncorporacao
+ *         - cargo
+ */
+
 module.exports = router;
