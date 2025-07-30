@@ -12,9 +12,7 @@ const getAgentes = (req, res, next) => {
     let agentes = agentesRepository.findAll();
     const { cargo, sort } = req.query;
     if (cargo) {
-      if (cargo !== "inspetor" && cargo !== "delegado")
-        throw new ApiError('Cargo deve ser "inspetor" ou "delegado"', 400);
-      agentes = [...agentes].filter((a) => a.cargo === cargo);
+      agentes = [...agentes].filter((a) => a.cargo.toLocaleLowerCase() === cargo.toLocaleLowerCase());
     }
     if (sort) {
       agentes = agentes.filter(

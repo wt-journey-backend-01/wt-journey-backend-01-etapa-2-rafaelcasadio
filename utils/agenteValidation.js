@@ -21,9 +21,9 @@ const agenteSchema = z.object({
         message: "Data inválida no calendário.",
       }
     ),
-  cargo: z.enum(["inspetor", "delegado"], {
-    message: "Cargo deve ser 'inspetor' ou 'delegado'",
-  }),
+  cargo: z
+    .string({ required_error: "Cargo é obrigatório." })
+    .min(1, "Cargo não pode ser vazio.")
 });
 
 module.exports = { agenteSchema };
